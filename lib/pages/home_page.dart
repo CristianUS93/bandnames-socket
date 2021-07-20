@@ -16,7 +16,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   List<Band> bands = [];
 
   @override
@@ -29,10 +28,8 @@ class _HomePageState extends State<HomePage> {
     super.initState();
   }
 
-  _handleActiveBands(dynamic payload){
-    this.bands = (payload as List)
-        .map((band) => Band.fromMap(band))
-        .toList();
+  _handleActiveBands(dynamic payload) {
+    this.bands = (payload as List).map((band) => Band.fromMap(band)).toList();
     setState(() {});
   }
 
@@ -44,24 +41,31 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
     final _socketService = Provider.of<SocketServices>(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("BandNames", style: TextStyle(color: Colors.black87),),
+        title: Text(
+          "BandNames",
+          style: TextStyle(color: Colors.black87),
+        ),
         centerTitle: true,
         backgroundColor: Colors.white,
         elevation: 1,
         actions: [
           Container(
-            padding: EdgeInsets.only(right: 10),
-            child: _socketService.serverStatus == ServerStatus.Online
-                ? Icon(Icons.check_circle, color: Colors.blue[300],)
-                : Icon(Icons.offline_bolt, color: Colors.red,)
-          )
+              padding: EdgeInsets.only(right: 10),
+              child: _socketService.serverStatus == ServerStatus.Online
+                  ? Icon(
+                      Icons.check_circle,
+                      color: Colors.blue[300],
+                    )
+                  : Icon(
+                      Icons.offline_bolt,
+                      color: Colors.red,
+                    ))
         ],
       ),
       body: Column(
@@ -69,8 +73,9 @@ class _HomePageState extends State<HomePage> {
           _showGraf(),
           Expanded(
             child: ListView.builder(
+              shrinkWrap: true,
               itemCount: bands.length,
-              itemBuilder: (context, index){
+              itemBuilder: (context, index) {
                 return bandTile(bands[index]);
               },
             ),
@@ -108,7 +113,7 @@ class _HomePageState extends State<HomePage> {
               ],
             );
           });
-    } else if(Platform.isIOS){
+    } else if (Platform.isIOS) {
       showCupertinoDialog(
           context: context,
           builder: (_) {
@@ -135,7 +140,6 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-
   Widget bandTile(Band band) {
     final _socketService = Provider.of<SocketServices>(context, listen: false);
 
@@ -147,21 +151,23 @@ class _HomePageState extends State<HomePage> {
         color: Colors.red,
         child: Align(
           alignment: Alignment.centerLeft,
-          child: Text("Delete Band", style: TextStyle(color: Colors.white),),
+          child: Text(
+            "Delete Band",
+            style: TextStyle(color: Colors.white),
+          ),
         ),
       ),
       child: ListTile(
         leading: CircleAvatar(
-          child: Text(band.name.substring(0,2)),
+          child: Text(band.name.substring(0, 2)),
           backgroundColor: Colors.blue[100],
         ),
         title: Text(band.name),
         trailing: Text(band.votes.toString()),
-        onTap: () => _socketService.emit('vote-band',{'id': band.id}),
+        onTap: () => _socketService.emit('vote-band', {'id': band.id}),
       ),
     );
   }
-
 
   void addBandToList(String name) {
     final _socketService = Provider.of<SocketServices>(context, listen: false);
@@ -171,9 +177,8 @@ class _HomePageState extends State<HomePage> {
     Navigator.pop(context);
   }
 
-
   //Mostrar Grafica
-  _showGraf(){
+  _showGraf() {
     Map<String, double> dataMap = {};
 
     bands.forEach((band) {
@@ -191,15 +196,18 @@ class _HomePageState extends State<HomePage> {
     ];
 
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 10),
+      padding: EdgeInsets.all(10),
       height: 200,
       width: double.infinity,
-      child: PieChart(
-        dataMap: dataMap,
-        chartType: ChartType.ring,
-        colorList: colorList,
-      ),
+      child: dataMap.isEmpty
+          ? Center(
+              child: CircularProgressIndicator(),
+            )
+          : PieChart(
+              dataMap: dataMap,
+              chartType: ChartType.disc,
+              colorList: colorList,
+            ),
     );
   }
-
 }
